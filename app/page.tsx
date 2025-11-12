@@ -11,10 +11,17 @@ interface DashboardData {
   tier2_percentage: number;
   tier3_count: number;
   tier3_percentage: number;
-  icp_positive: number;
-  icp_neutral: number;
-  icp_negative: number;
+  icp_positive?: number;
+  icp_neutral?: number;
+  icp_negative?: number;
+  individual_icp_positive?: number;
+  individual_icp_neutral?: number;
+  individual_icp_negative?: number;
+  tier4_count?: number;
+  tier4_percentage?: number;
   created_at?: string;
+  id?: number;
+  [key: string]: any;
 }
 
 interface DashboardState {
@@ -194,19 +201,19 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <DashboardCard
               title="ICP Positive"
-              value={data.icp_positive}
+              value={data?.icp_positive ?? data?.individual_icp_positive ?? 0}
               subtitle="Ideal customer profile"
               gradient="blue"
             />
             <DashboardCard
               title="ICP Neutral"
-              value={data.icp_neutral}
+              value={data?.icp_neutral ?? data?.individual_icp_neutral ?? 0}
               subtitle="Moderate fit"
               gradient="purple"
             />
             <DashboardCard
               title="ICP Negative"
-              value={data.icp_negative}
+              value={data?.icp_negative ?? data?.individual_icp_negative ?? 0}
               subtitle="Low fit"
               gradient="accent"
             />
