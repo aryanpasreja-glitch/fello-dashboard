@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --fello-coral: #FF7A6B;
+  --fello-navy: #515B8E;
+  --fello-light: #F8F9FC;
+  --fello-dark: #2B3048;
+  --fello-purple: #8B7FB8;
+  --fello-pink: #E88BA8;
+  --fello-blue: #6B9FE8;
+}
+
+body {
+  @apply bg-fello-light text-fello-dark;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
