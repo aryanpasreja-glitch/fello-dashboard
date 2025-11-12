@@ -1,16 +1,18 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseServiceKey) {
-      return NextResponse.json(
+      const response = NextResponse.json(
         { error: 'Missing Supabase configuration. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in your .env.local file' },
         { status: 500 }
       );
+      response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      return response;
     }
 
     // Use service role key for executing queries
@@ -23,7 +25,11 @@ export async function GET() {
     console.log('RPC call result:', { refreshData, refreshError });
 
     if (!refreshError && refreshData && refreshData.length > 0) {
-      return NextResponse.json({ data: refreshData[0] });
+      const response = NextResponse.json({ data: refreshData[0] });
+      response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      response.headers.set('Pragma', 'no-cache');
+      response.headers.set('Expires', '0');
+      return response;
     }
 
     // If function doesn't exist or fails, try to get the latest data from the table
@@ -38,7 +44,11 @@ export async function GET() {
     console.log('Table fetch result:', { existingData, fetchError });
 
     if (existingData && !fetchError) {
-      return NextResponse.json({ data: existingData });
+      const response = NextResponse.json({ data: existingData });
+      response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      response.headers.set('Pragma', 'no-cache');
+      response.headers.set('Expires', '0');
+      return response;
     }
 
     // If no data exists, return error with instructions
@@ -47,7 +57,7 @@ export async function GET() {
       fetchError: fetchError?.message
     });
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       { 
         error: 'No dashboard data found',
         message: refreshError 
@@ -63,12 +73,16 @@ export async function GET() {
       },
       { status: 404 }
     );
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    return response;
   } catch (error: any) {
     console.error('Dashboard API error:', error);
-    return NextResponse.json(
+    const response = NextResponse.json(
       { error: 'Internal server error', details: error.message },
       { status: 500 }
     );
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    return response;
   }
 }
 

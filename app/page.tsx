@@ -17,17 +17,38 @@ interface DashboardData {
   created_at?: string;
 }
 
+interface DashboardState {
+  data: DashboardData | null;
+  loading: boolean;
+  error: string | null;
+  lastRefresh: string | null;
+}
+
 export default function Home() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastRefresh, setLastRefresh] = useState<string | null>(null);
 
   const fetchDashboardData = async () => {
     try {
+      console.log('🔄 Starting fetch at:', new Date().toLocaleTimeString());
       setLoading(true);
       setError(null);
-      const response = await fetch('/api/dashboard');
+      
+      // Add cache-busting timestamp to avoid 304 responses
+      const timestamp = new Date().getTime();
+      const response = await fetch(`/api/dashboard?t=${timestamp}`, {
+        method: 'GET',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+      console.log('📡 Response status:', response.status);
+      
       const result = await response.json();
+      console.log('✅ Data received:', result);
 
       if (!response.ok) {
         const errorMessage = result.message 
@@ -37,9 +58,11 @@ export default function Home() {
       }
 
       setData(result.data);
+      setLastRefresh(new Date().toLocaleTimeString());
+      console.log('✅ Data updated successfully at', new Date().toLocaleTimeString());
     } catch (err: any) {
       setError(err.message || 'An error occurred');
-      console.error('Error fetching dashboard data:', err);
+      console.error('❌ Error fetching dashboard data:', err);
     } finally {
       setLoading(false);
     }
@@ -191,8 +214,13 @@ export default function Home() {
         </div>
 
         {/* Last Updated */}
-        <div className="mt-8 text-center text-sm text-gray-500">
-          Last updated: {new Date().toLocaleString()}
+        <div className="mt-8 text-center">
+          <p className="text-sm text-gray-500">
+            Last refreshed: {lastRefresh ? lastRefresh : 'Just now'}
+          </p>
+          <p className="text-xs text-gray-400 mt-1">
+            Database updated: {data?.created_at ? new Date(data.created_at).toLocaleString() : 'N/A'}
+          </p>
         </div>
       </main>
     </div>
